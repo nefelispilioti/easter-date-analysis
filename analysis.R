@@ -2,7 +2,9 @@
 library(ggplot2)
 library(dplyr)
 
-# Function to calculate Catholic Easter (Meeus algorithm)
+# --- FUNCTIONS ---
+
+# 1. Function for Catholic Easter (Gregorian Calendar)
 catholic_easter <- function(year) {
   a <- year %% 19
   b <- year %/% 100
@@ -19,43 +21,69 @@ catholic_easter <- function(year) {
   month <- (h + l - 7*m + 114) %/% 31
   day <- ((h + l - 7*m + 114) %% 31) + 1
   
-  as.Date(paste(year, month, day, sep = "-"))
+  return(as.Date(paste(year, month, day, sep = "-")))
 }
 
-# Simple approximation for Orthodox Easter (for demo)
+# 2. Function for Orthodox Easter (Julian Calendar calculation adjusted to Gregorian)
+# Using the Meeus algorithm for the Julian calendar
 orthodox_easter <- function(year) {
-  catholic <- catholic_easter(year)
-  catholic + sample(c(0,7,14,21,28),1)  # approximate difference
+  a <- year %% 4
+  b <- year %% 7
+  c <- year %% 19
+  d <- (19 * c + 15) %% 30
+  e <- (2 * a + 4 * b - d + 34) %% 7
+  month <- (d + e + 114) %/% 31
+  day <- ((d + e + 114) %% 31) + 1
+  
+  # Conversion to Gregorian calendar (for the years 2024-2123, the difference is 13 days)
+  # This makes the dates comparable for your analysis
+  julian_date <- as.Date(paste(year, month, day, sep = "-"))
+  gregorian_date <- julian_date + 13
+  
+  return(gregorian_date)
 }
 
-# Generate data
+# --- DATA GENERATION ---
+
 years <- 2024:2123
+data <- data.frame(Year = years)
 
-data <- data.frame(
-  Year = years,
-  Catholic_Easter = sapply(years, catholic_easter),
-  Orthodox_Easter = sapply(years, orthodox_easter)
-)
+# Correctly applying functions to maintain Date format
+data$Catholic_Easter <- do.call(c, lapply(years, catholic_easter))
+data$Orthodox_Easter <- do.call(c, lapply(years, orthodox_easter))
 
-# Difference
+# Calculate the difference in days
 data$Difference <- as.numeric(data$Orthodox_Easter - data$Catholic_Easter)
 
-# Summary statistics
-summary(data$Difference)
+# --- ANALYSIS & OUTPUT ---
 
-# How many times dates coincide
+# 1. Basic Stats
+cat("--- Statistical Summary of Differences (in days) ---\n")
+print(summary(data$Difference))
+
+# 2. Insightful Metrics
 same_dates <- sum(data$Difference == 0)
-print(paste("Years with same Easter date:", same_dates))
+cat("\nTotal years with same Easter date (out of 100):", same_dates)
 
-# Average difference
 avg_diff <- mean(data$Difference)
-print(paste("Average difference in days:", avg_diff))
+cat("\nAverage difference:", round(avg_diff, 2), "days")
 
-# Max difference
 max_diff <- max(data$Difference)
-print(paste("Maximum difference in days:", max_diff))
+cat("\nMaximum observed difference:", max_diff, "days\n")
 
-# Plot
+# --- VISUALIZATION ---
+
 ggplot(data, aes(x = Year, y = Difference)) +
-  geom_line() +
-  ggtitle("Difference between Orthodox and Catholic Easter Dates")
+  geom_line(color = "#2c3e50", size = 1) +
+  geom_point(aes(color = (Difference == 0)), size = 2) +
+  scale_color_manual(values = c("black", "red"), labels = c("Different", "Same Date")) +
+  theme_minimal() +
+  labs(
+    title = "Analysis of Easter Date Deviations (2024-2123)",
+    subtitle = "Comparing Orthodox vs Catholic Easter Dates",
+    x = "Year",
+    y = "Difference in Days",
+    color = "Coincidence"
+  ) +
+  theme(legend.position = "bottom")
+
