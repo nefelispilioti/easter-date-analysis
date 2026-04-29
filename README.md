@@ -1,15 +1,18 @@
 # Easter Date Analysis
 
 ## Objective
-Analyze and compare the dates of Orthodox and Catholic Easter over time.
+Analyze patterns and differences between Orthodox and Catholic Easter dates over time.
 
-## Description
-This project explores patterns and differences between Orthodox and Catholic Easter dates using data analysis in R.
+## Methodology
+- Generated Easter dates using algorithmic calculations
+- Compared Orthodox and Catholic calendars
+- Calculated differences in days
+- Visualized trends over time
 
-## Analysis
-- Calculation of date differences between the two calendars
-- Identification of years with coinciding Easter dates
-- Visualization of trends over time
+## Key Findings
+- Easter dates differ by varying number of days across years
+- Coinciding dates occur in specific patterns
+- Average difference between dates is approximately X days
 
 ## Tools
 - R
