@@ -40,6 +40,21 @@ data <- data.frame(
 # Difference
 data$Difference <- as.numeric(data$Orthodox_Easter - data$Catholic_Easter)
 
+# Summary statistics
+summary(data$Difference)
+
+# How many times dates coincide
+same_dates <- sum(data$Difference == 0)
+print(paste("Years with same Easter date:", same_dates))
+
+# Average difference
+avg_diff <- mean(data$Difference)
+print(paste("Average difference in days:", avg_diff))
+
+# Max difference
+max_diff <- max(data$Difference)
+print(paste("Maximum difference in days:", max_diff))
+
 # Plot
 ggplot(data, aes(x = Year, y = Difference)) +
   geom_line() +
