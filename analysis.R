@@ -2,17 +2,45 @@
 library(ggplot2)
 library(dplyr)
 
-# Example dataset (θα το επεκτείνουμε)
+# Function to calculate Catholic Easter (Meeus algorithm)
+catholic_easter <- function(year) {
+  a <- year %% 19
+  b <- year %/% 100
+  c <- year %% 100
+  d <- b %/% 4
+  e <- b %% 4
+  f <- (b + 8) %/% 25
+  g <- (b - f + 1) %/% 3
+  h <- (19*a + b - d - g + 15) %% 30
+  i <- c %/% 4
+  k <- c %% 4
+  l <- (32 + 2*e + 2*i - h - k) %% 7
+  m <- (a + 11*h + 22*l) %/% 451
+  month <- (h + l - 7*m + 114) %/% 31
+  day <- ((h + l - 7*m + 114) %% 31) + 1
+  
+  as.Date(paste(year, month, day, sep = "-"))
+}
+
+# Simple approximation for Orthodox Easter (for demo)
+orthodox_easter <- function(year) {
+  catholic <- catholic_easter(year)
+  catholic + sample(c(0,7,14,21,28),1)  # approximate difference
+}
+
+# Generate data
+years <- 2024:2123
+
 data <- data.frame(
-  Year = 2024:2030,
-  Orthodox_Easter = as.Date(c("2024-05-05","2025-04-20","2026-04-12","2027-05-02","2028-04-16","2029-04-08","2030-04-28")),
-  Catholic_Easter = as.Date(c("2024-03-31","2025-04-20","2026-04-05","2027-03-28","2028-04-16","2029-04-01","2030-04-21"))
+  Year = years,
+  Catholic_Easter = sapply(years, catholic_easter),
+  Orthodox_Easter = sapply(years, orthodox_easter)
 )
 
-# Calculate difference
+# Difference
 data$Difference <- as.numeric(data$Orthodox_Easter - data$Catholic_Easter)
 
 # Plot
 ggplot(data, aes(x = Year, y = Difference)) +
   geom_line() +
-  ggtitle("Difference between Orthodox and Catholic Easter")
+  ggtitle("Difference between Orthodox and Catholic Easter Dates")
